@@ -1,0 +1,16 @@
+devtools_venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+*.log
+*.env
+*.db
+postgres_data/
+
+.idea/
+.vscode/
+
+.DS_Store
