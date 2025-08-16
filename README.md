@@ -1,11 +1,41 @@
 # My own microservice project
 This is a repository for an educational project within the DevOps CI/CD course.
 
-## Django Project
+## [DevTools Setup Script](/install_dev_tools.sh)
 
-This project is a Dockerized Django web application with PostgreSQL as the database and Nginx as a reverse proxy.
+This Bash script automates the installation and setup of a Python development environment with Docker, Docker Compose, and Django on Ubuntu-based systems. It also creates and activates a Python virtual environment.
+
+### Features
+
+- Installs essential packages: docker.io, docker-compose, python3, python3-venv, and python3-pip.
+- Checks Python version and ensures Python 3.9 or newer is installed.
+- Creates and activates a virtual environment (devtools_venv).
+- Upgrades pip inside the virtual environment.
+- Installs Django inside the virtual environment.
+- Provides color-coded console messages for easy readability.
+
+### Usage
+
+Make the script executable:
+```bash
+chmod +x install_dev_tools.sh
+```
+
+Run the script:
+```bash
+./install_dev_tools.sh
+```
+
+Activate the virtual environment:
+```bash
+source devtools_venv/bin/activate
+```
 
 ---
+
+## [Django Project](/docker/)
+
+This project is a Dockerized Django web application with PostgreSQL as the database and Nginx as a reverse proxy.
 
 ### Project Structure
 
