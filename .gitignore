@@ -14,3 +14,5 @@ postgres_data/
 .vscode/
 
 .DS_Store
+.terraform
+.terraform.lock.hcl

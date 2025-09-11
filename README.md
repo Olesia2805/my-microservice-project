@@ -92,3 +92,94 @@ sudo docker-compose down
 ```bash
 sudo docker system prune -f
 ```
+
+## [Terraform HW5](/terraform-hw-5/)
+
+Структура проєкту
+```
+terraform-hw-5/
+│
+├── main.tf                  # Головний файл для підключення модулів
+├── backend.tf               # Налаштування бекенду для стейтів (S3 + DynamoDB)
+├── outputs.tf               # Загальне виведення ресурсів
+│
+├── modules/                 # Каталог з усіма модулями
+│   │
+│   ├── s3-backend/          # Модуль для S3 та DynamoDB
+│   │   ├── s3.tf            # Створення S3-бакета
+│   │   ├── dynamodb.tf      # Створення DynamoDB
+│   │   ├── variables.tf     # Змінні для S3
+│   │   └── outputs.tf       # Виведення інформації про S3 та DynamoDB
+│   │
+│   ├── vpc/                 # Модуль для VPC
+│   │   ├── vpc.tf           # Створення VPC, підмереж, Internet Gateway
+│   │   ├── routes.tf        # Налаштування маршрутизації
+│   │   ├── variables.tf     # Змінні для VPC
+│   │   └── outputs.tf       # Виведення інформації про VPC
+│   │
+│   └── ecr/                 # Модуль для ECR
+│       ├── ecr.tf           # Створення ECR репозиторію
+│       ├── variables.tf     # Змінні для ECR
+│       └── outputs.tf       # Виведення URL репозиторію ECR
+│
+└── README.md                # Документація проєкту
+```
+
+### Схема взаємодії модулів
+
+```
+                ┌───────────────┐
+                │   Terraform   │
+                │   main.tf     │
+                └──────┬────────┘
+                       │
+    ┌──────────────────┼─────────────────────┐
+    │                  │                     │
+┌───▼───┐          ┌───▼───┐             ┌───▼───┐
+│s3-    │          │ vpc   │             │ ecr   │
+│backend│          │module │             │module │
+└───┬───┘          └───┬───┘             └───┬───┘
+    │                  │                     │
+    │                  │                     │
+    │                  │                     │
+┌───▼───────────────┐ ┌▼──────────────────┐ ┌▼──────────────┐
+│ S3 Bucket         │ │ VPC               │ │ ECR Repo      │
+│ terraform.tfstate │ │ ├─ Public Subnets │ │ Images        │
+│ Versioning        │ │ ├─ Private Subnets│ │ Scan on Push  │
+│ Ownership         │ │ └─ Internet GW    │ │ Tags          │
+│ DynamoDB          │ │ Routing Tables    │ └───────────────┘
+└───────────────────┘ └───────────────────┘
+
+```
+
+**Пояснення:**
+- `main.tf` викликає всі модулі (`s3-backend`, `vpc`, `ecr`) та координує створення інфраструктури.
+- **S3-backend**
+   - Створює S3-бакет для зберігання `terraform.tfstate`.
+   - Включає версіонування файлів для можливості відновлення стану.
+   - Налаштовує власність об’єктів (BucketOwnerEnforced) для безпечного доступу.
+   - Створює DynamoDB таблицю для блокування стану (locking).
+- **VPC**
+   - Створює ізольовану VPC мережу.
+   - Створює публічні та приватні підмережі у вказаних Availability Zones.
+   - Додає Internet Gateway для виходу публічних підмереж в Інтернет.
+   - Налаштовує маршрутизацію між підмережами.
+- **ECR**
+   - Створює ECR репозиторій для зберігання Docker образів.
+   - Налаштовує сканування образів при пуші на наявність вразливостей.
+   - Додає теги для середовища та назви репозиторію.
+
+### Приклад використання Terraform
+
+- Terraform init
+![terraform init](./terraform-hw-5/img/terraform_init.png)
+
+- Terraform plan
+![terraform plan](./terraform-hw-5/img/terraform_plan.png)
+
+- Terraform apply
+![terraform apply 1](./terraform-hw-5/img/terraform_apply_1.png)
+![terraform apply 2](./terraform-hw-5/img/terraform_apply_2.png)
+
+- Terraform destroy
+![terraform destroy](./terraform-hw-5/img/terraform_destroy.png)
