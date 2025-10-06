@@ -1,0 +1,13 @@
+image:
+  repository: 139144002561.dkr.ecr.us-east-1.amazonaws.com/lesson-7-ecr
+  tag: latest
+
+hpa:
+  minReplicas: 2
+  maxReplicas: 6
+  cpuUtilization: 70
+
+env:
+  DJANGO_SETTINGS_MODULE: "myproject.settings"
+  DEBUG: "False"
+  ALLOWED_HOSTS: "*"

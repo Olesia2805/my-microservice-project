@@ -183,3 +183,225 @@ terraform-hw-5/
 
 - Terraform destroy
 ![terraform destroy](./terraform-hw-5/img/terraform_destroy.png)
+
+## [Terraform HW7](/terraform-hw-7/)
+
+![upload_app](./terraform-hw-7/img/upload_app.png)
+
+Структура проєкту
+```
+lesson-7/
+│
+├── main.tf                  # Головний файл для підключення модулів
+├── backend.tf               # Налаштування бекенду для стейтів (S3 + DynamoDB)
+├── outputs.tf               # Загальні виводи ресурсів
+│
+├── modules/                 # Каталог з усіма модулями
+│   ├── s3-backend/          # Модуль для S3 та DynamoDB
+│   │   ├── s3.tf            # Створення S3-бакета
+│   │   ├── dynamodb.tf      # Створення DynamoDB
+│   │   ├── variables.tf     # Змінні для S3
+│   │   └── outputs.tf       # Виведення інформації про S3 та DynamoDB
+│   │
+│   ├── vpc/                 # Модуль для VPC
+│   │   ├── vpc.tf           # Створення VPC, підмереж, Internet Gateway
+│   │   ├── routes.tf        # Налаштування маршрутизації
+│   │   ├── variables.tf     # Змінні для VPC
+│   │   └── outputs.tf  
+│   ├── ecr/                 # Модуль для ECR
+│   │   ├── ecr.tf           # Створення ECR репозиторію
+│   │   ├── variables.tf     # Змінні для ECR
+│   │   └── outputs.tf       # Виведення URL репозиторію
+│   │
+│   └── eks/                 # Модуль для Kubernetes кластера
+│       ├── eks.tf           # Створення кластера
+│       ├── variables.tf     # Змінні для EKS
+│       └── outputs.tf       # Виведення інформації про кластер
+│
+├── charts/
+│   └── django-app/
+│       ├── templates/
+│       │   ├── deployment.yaml
+│       │   ├── service.yaml
+│       │   ├── configmap.yaml
+│       │   └── hpa.yaml
+│       ├── Chart.yaml
+│       └── values.yaml     # ConfigMap зі змінними середовища
+│
+└── README.md                # Документація проєкту
+```
+
+Ось готовий варіант README з покроковими інструкціями для повторного запуску Django на EKS, у форматі “+-“ для виділення кроків і підкроків:
+
+---
+
+# [Terraform HW7](/terraform-hw-7/)
+
+![upload\_app](./terraform-hw-7/img/upload_app.png)
+
+## Структура проєкту
+
+```
+lesson-7/
+│
+├── main.tf                  # Головний файл для підключення модулів
+├── backend.tf               # Налаштування бекенду для стейтів (S3 + DynamoDB)
+├── outputs.tf               # Загальні виводи ресурсів
+│
+├── modules/                 # Каталог з усіма модулями
+│   ├── s3-backend/          # Модуль для S3 та DynamoDB
+│   ├── vpc/                 # Модуль для VPC
+│   ├── ecr/                 # Модуль для ECR
+│   └── eks/                 # Модуль для Kubernetes кластера
+│
+├── charts/
+│   └── django-app/
+│       ├── templates/
+│       │   ├── deployment.yaml
+│       │   ├── service.yaml
+│       │   ├── configmap.yaml
+│       │   └── hpa.yaml
+│       ├── Chart.yaml
+│       └── values.yaml     # ConfigMap зі змінними середовища
+│
+└── README.md                # Документація проєкту
+```
+
+---
+
+Ось README у форматі покрокових інструкцій без “+”:
+
+---
+
+# [Terraform HW7](/terraform-hw-7/)
+
+![upload\_app](./terraform-hw-7/img/upload_app.png)
+
+## Структура проєкту
+
+```
+lesson-7/
+│
+├── main.tf                  # Головний файл для підключення модулів
+├── backend.tf               # Налаштування бекенду для стейтів (S3 + DynamoDB)
+├── outputs.tf               # Загальні виводи ресурсів
+│
+├── modules/                 # Каталог з усіма модулями
+│   ├── s3-backend/          # Модуль для S3 та DynamoDB
+│   ├── vpc/                 # Модуль для VPC
+│   ├── ecr/                 # Модуль для ECR
+│   └── eks/                 # Модуль для Kubernetes кластера
+│
+├── charts/
+│   └── django-app/
+│       ├── templates/
+│       │   ├── deployment.yaml
+│       │   ├── service.yaml
+│       │   ├── configmap.yaml
+│       │   └── hpa.yaml
+│       ├── Chart.yaml
+│       └── values.yaml     # ConfigMap зі змінними середовища
+│
+└── README.md                # Документація проєкту
+```
+
+---
+
+## Покрокова інструкція для деплойменту Django на EKS
+
+### Підготовка Docker-образу
+
+1. Перейти в каталог проєкту:
+
+2. Побудувати Docker-образ:
+
+```powershell
+docker build -t lesson-7-ecr .
+```
+
+3. Логін в ECR:
+
+```powershell
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <account_id>.dkr.ecr.us-east-1.amazonaws.com
+```
+
+4. Позначити образ тегом ECR та запушити:
+
+```powershell
+docker tag lesson-7-ecr:latest <account_id>.dkr.ecr.us-east-1.amazonaws.com/lesson-7-ecr:latest
+docker push <account_id>.dkr.ecr.us-east-1.amazonaws.com/lesson-7-ecr:latest
+```
+
+### Зміни в Django settings
+
+1. Відкрити `goit/settings.py`.
+2. Замінити підключення до PostgreSQL на SQLite:
+
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+```
+
+3. Додати `ALLOWED_HOSTS`:
+
+```python
+ALLOWED_HOSTS = ["*"]
+```
+
+### Підготовка Kubernetes ресурсів
+
+### Застосування ресурсів в Kubernetes
+
+1. Застосувати ConfigMap:
+
+```powershell
+kubectl apply -f .\charts\django-app\templates\configmap.yaml -n lesson-7
+```
+
+2. Застосувати Deployment:
+
+```powershell
+kubectl apply -f .\charts\django-app\templates\deployment.yaml -n lesson-7
+```
+
+3. Перезапустити Deployment:
+
+```powershell
+kubectl rollout restart deployment lesson-7-django -n lesson-7
+```
+
+4. Застосувати Service:
+
+```powershell
+kubectl apply -f .\charts\django-app\templates\service.yaml -n lesson-7
+```
+
+### Перевірка роботи
+
+1. Перевірити статус подів:
+
+```powershell
+kubectl get pods -n lesson-7
+```
+
+2. Переглянути логи:
+
+```powershell
+kubectl logs -n lesson-7 -l app=lesson-7-django
+```
+
+3. Отримати зовнішній IP сервісу:
+
+```powershell
+kubectl get svc -n lesson-7
+```
+
+4. Відкрити у браузері:
+
+```
+http://<EXTERNAL-IP>
+```
