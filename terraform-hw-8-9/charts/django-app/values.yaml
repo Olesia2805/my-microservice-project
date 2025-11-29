@@ -1,5 +1,5 @@
 image:
-  repository: 139144002561.dkr.ecr.us-east-1.amazonaws.com/lesson-7-ecr
+  repository: 139144002561.dkr.ecr.us-east-1.amazonaws.com/lesson-8-9-ecr
   tag: latest
 
 hpa:

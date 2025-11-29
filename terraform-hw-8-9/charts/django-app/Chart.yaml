@@ -1,4 +1,4 @@
 apiVersion: v1
-name: lesson-7-django
-description: Django app for lesson-7
+name: lesson-8-9-django
+description: Django app for lesson-8-9
 version: 0.1.0
