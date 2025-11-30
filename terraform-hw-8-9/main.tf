@@ -28,3 +28,32 @@ module "eks" {
   cluster_name    = "eks-cluster-demo"            # Назва кластера
   subnet_ids      = module.vpc.public_subnets     # ID підмереж
 }
+
+# PULL API endpoints from AWS
+data "aws_eks_cluster" "eks" {
+  name = module.eks.eks_cluster_name
+}
+
+data "aws_eks_cluster_auth" "eks" {
+  name = module.eks.eks_cluster_name
+}
+
+# Jenkins
+module "jenkins" {
+  source = "./modules/jenkins"
+
+  cluster_name = module.eks.eks_cluster_name
+  kubeconfig   = module.eks.kubeconfig
+
+  depends_on = [module.eks]
+}
+
+# ArgoCD
+module "argo_cd" {
+  source = "./modules/argo_cd"
+
+  cluster_name = module.eks.eks_cluster_name
+  kubeconfig   = module.eks.kubeconfig
+
+  depends_on = [module.eks]
+}

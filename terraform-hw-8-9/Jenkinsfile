@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_ACCOUNT = "123456789012"
+        AWS_REGION  = "us-east-1"
+        ECR_REPO    = "django-app"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/.../django-app.git'
+            }
+        }
+
+        stage('Build Docker image') {
+            steps {
+                sh """
+                /kaniko/executor \
+                  --context `pwd` \
+                  --dockerfile Dockerfile \
+                  --destination $AWS_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:${BUILD_NUMBER}
+                """
+            }
+        }
+
+        stage('Update Helm chart') {
+            steps {
+                dir('helm-repo') {
+                    sh """
+                    sed -i 's/tag:.*/tag: ${BUILD_NUMBER}/' values.yaml
+                    git add .
+                    git commit -m "Update tag to ${BUILD_NUMBER}"
+                    git push origin main
+                    """
+                }
+            }
+        }
+    }
+}

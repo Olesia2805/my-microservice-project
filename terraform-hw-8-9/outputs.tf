@@ -32,3 +32,21 @@ output "ecr_repository_arn" {
 output "ecr_repository_name" {
   value = module.ecr.repository_name
 }
+
+# Jenkins
+output "jenkins_release" {
+  value = module.jenkins.jenkins_release_name
+}
+
+output "jenkins_namespace" {
+  value = module.jenkins.jenkins_namespace
+}
+
+# Argo CD
+output "argo_cd_server_url" {
+  value = "https://argo-cd.argo-cd.svc.cluster.local"
+}
+
+output "argo_cd_initial_admin_password" {
+  value = "admin"
+}
