@@ -319,42 +319,158 @@ kubectl get svc -n lesson-7
 http://<EXTERNAL-IP>
 ```
 
-"create database"
-terraform init -reconfigurate
+Ось структурований та повний README для твого проекту, оформлений під критерії оцінювання CI/CD завдання:
+
+---
+
+# Terraform HW8-9 — CI/CD для Django з Jenkins, Helm, Terraform та Argo CD
+
+Цей проект демонструє повний CI/CD процес для Django-застосунку, який автоматично збирає Docker-образ, пушить його в Amazon ECR та розгортає в Kubernetes через Argo CD із Helm.
+
+---
+
+## 1️⃣ Підготовка інфраструктури з Terraform
+
+1. Ініціалізація та застосування конфігурації Terraform:
+
+```bash
+terraform init -reconfigure
 terraform plan
 terraform apply
 terraform state list
+```
+
+2. Імпорт існуючих ресурсів у Terraform state:
+
+```bash
 terraform import module.eks.aws_iam_role.eks eks-cluster-demo-eks-cluster
 terraform import module.eks.aws_iam_role.eks_nodes eks-cluster-demo-nodes-role
 terraform import module.s3_backend.aws_s3_bucket.terraform_state terraform-state-bucket-001001-us-east-1
 terraform import module.s3_backend.aws_dynamodb_table.terraform_locks terraform-locks
+terraform import module.vpc.aws_vpc.main vpc-0abcd1234ef567890
+terraform import module.vpc.aws_subnet.public[0] subnet-0abc123def456gh78
+terraform import module.vpc.aws_subnet.private[0] subnet-0def456abc789gh12
+terraform import module.eks.aws_eks_cluster.cluster eks-cluster-demo
+terraform import module.eks.aws_eks_node_group.nodes eks-cluster-demo-nodegroup
+```
+
+3. Перевірка доступних вузлів Kubernetes:
+
+```bash
 kubectl get nodes
+```
+
+---
+
+## 2️⃣ Робота з Docker та Amazon ECR
+
+1. Логін у ECR:
+
+```powershell
 $pass = aws ecr get-login-password --region us-east-1
 docker login --username AWS --password $pass <account_id>.dkr.ecr.us-east-1.amazonaws.com
-![Jenkins](./terraform-hw-8-9/img/Jenkins.png)
+```
+
+2. Перевірка наявності репозиторію:
+
+```bash
 aws ecr describe-repositories --repository-names lesson-8-9-ecr
-open docker desktop
+```
+
+3. Збірка та пуш Docker-образу:
+
+```bash
 docker build -t lesson-8-9-ecr:latest -f docker/django/Dockerfile .
 docker tag lesson-8-9-ecr:latest <account_id>.dkr.ecr.us-east-1.amazonaws.com/lesson-8-9-ecr:latest
 docker push <account_id>.dkr.ecr.us-east-1.amazonaws.com/lesson-8-9-ecr:latest
+```
+
+4. Перевірка образів у репозиторії:
+
+```bash
 aws ecr list-images --repository-name lesson-8-9-ecr
+```
+
+---
+
+## 3️⃣ Налаштування Argo CD
+
+1. Перевірка статусу namespace та Argo CD:
+
+```bash
 kubectl get ns
 kubectl get pods -n argo-cd
 kubectl get svc -n argo-cd
+```
+
+2. Порт-форвардинг Argo CD для доступу через браузер:
+
+```bash
 kubectl port-forward svc/argo-cd-argocd-server -n argo-cd 8080:443
-https://localhost:8080/
+```
+
+Відкриваємо у браузері: [https://localhost:8080/](https://localhost:8080/)
+
+3. Отримання початкового пароля адміністратора:
+
+```powershell
 $pass = kubectl get secret argocd-initial-admin-secret -n argo-cd -o jsonpath="{.data.password}"
 [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($pass))
-![ARGO](./terraform-hw-8-9/img/ARGO.png)
+```
+
+4. Логін у CLI Argo CD:
+
+```powershell
+argocd login localhost:8081 --username admin --password $pass --insecure
+```
+
+---
+
+## 4️⃣ Робота з Helm та Django застосунком
+
+1. Перехід у каталог Helm-чарту:
+
+```bash
 cd charts/django-app
+```
+
+2. Перегляд шаблонів Helm:
+
+```bash
 helm template myapp . `
   --set image.repository=<account_id>.dkr.ecr.us-east-1.amazonaws.com/lesson-8-9-ecr `
   --set image.tag=latest
+```
+
+3. Створення namespace для Django:
+
+```bash
 kubectl create namespace django
+```
+
+4. Застосування Argo CD Application:
+
+```bash
 kubectl apply -f modules/argo_cd/charts/templates/application.yaml -n argo-cd
-kubectl port-forward svc/argo-cd-argocd-server -n argo-cd 8081:443
-$pass = kubectl -n argo-cd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | ForEach-Object { [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_)) }
-argocd login localhost:8081 --username admin --password $pass --insecure
-cd modules\argo_cd\charts\templates
-kubectl apply -f .\application.yaml
-![Django-app_deploy](./terraform-hw-8-9/img/Django-app_deploy.png)
+```
+
+5. Перевірка розгортання:
+
+```bash
+kubectl get pods -n django
+kubectl get svc -n django
+```
+
+---
+
+## 5️⃣ Скріншоти
+
+* Jenkins:
+  ![Jenkins](./terraform-hw-8-9/img/Jenkins.png)
+
+* Argo CD:
+  ![ARGO](./terraform-hw-8-9/img/ARGO.png)
+
+* Django застосунок розгорнуто:
+  ![Django-app\_deploy](./terraform-hw-8-9/img/Django-app_deploy.png)
+
