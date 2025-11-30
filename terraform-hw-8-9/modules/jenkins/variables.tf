@@ -1,9 +1,11 @@
-variable "cluster_name" {
-  description = "Name of the EKS cluster"
+variable "namespace" {
+  description = "Kubernetes namespace where Jenkins will be deployed"
   type        = string
+  default     = "jenkins"
 }
 
-variable "kubeconfig" {
-  description = "Kubernetes access configuration"
+variable "chart_version" {
+  description = "Helm chart version for Jenkins"
   type        = string
+  default     = "5.8.110"
 }

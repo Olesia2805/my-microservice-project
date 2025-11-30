@@ -2,15 +2,24 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: django-app
+  namespace: argo-cd
 spec:
-  destination:
-    name: in-cluster
-    namespace: django
   project: default
   source:
     repoURL: 'https://github.com/Olesia2805/my-microservice-project.git'
-    path: charts/django-app
-    targetRevision: main
+    targetRevision: lesson-8-9
+    path: terraform-hw-8-9/charts/django-app
+    helm:
+      valueFiles:
+        - values.yaml
+      parameters:
+        - name: image.repository
+          value: 139144002561.dkr.ecr.us-east-1.amazonaws.com/lesson-8-9-ecr
+        - name: image.tag
+          value: latest
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: django
   syncPolicy:
     automated:
       prune: true

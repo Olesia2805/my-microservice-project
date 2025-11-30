@@ -1,4 +1,4 @@
-# Підключаємо модуль S3 та DynamoDB
+# S3 backend module
 module "s3_backend" {
   source      = "./modules/s3-backend"
   bucket_name = "terraform-state-bucket-001001-us-east-1"
@@ -29,31 +29,50 @@ module "eks" {
   subnet_ids      = module.vpc.public_subnets     # ID підмереж
 }
 
-# PULL API endpoints from AWS
-data "aws_eks_cluster" "eks" {
+data "aws_eks_cluster" "this" {
   name = module.eks.eks_cluster_name
-}
-
-data "aws_eks_cluster_auth" "eks" {
-  name = module.eks.eks_cluster_name
-}
-
-# Jenkins
-module "jenkins" {
-  source = "./modules/jenkins"
-
-  cluster_name = module.eks.eks_cluster_name
-  kubeconfig   = module.eks.kubeconfig
-
   depends_on = [module.eks]
 }
 
-# ArgoCD
-module "argo_cd" {
-  source = "./modules/argo_cd"
+data "aws_eks_cluster_auth" "this" {
+  name = module.eks.eks_cluster_name
+  depends_on = [module.eks]
+}
 
-  cluster_name = module.eks.eks_cluster_name
-  kubeconfig   = module.eks.kubeconfig
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.this.endpoint
+  token                  = data.aws_eks_cluster_auth.this.token
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = data.aws_eks_cluster.this.endpoint
+    token                  = data.aws_eks_cluster_auth.this.token
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+  }
+}
+
+
+# Jenkins module (Helm release)
+module "jenkins" {
+  source       = "./modules/jenkins"
+  namespace    = "jenkins"
+
+  depends_on  = [module.eks]
+}
+
+# ArgoCD module (Helm release)
+module "argo_cd" {
+  source     = "./modules/argo_cd"
+  namespace  = "argo-cd"
+  helm_chart_repo_url = "https://argoproj.github.io/argo-helm"
+
+  providers = {
+    kubernetes = kubernetes
+    helm       = helm
+  }
 
   depends_on = [module.eks]
 }

@@ -33,20 +33,16 @@ output "ecr_repository_name" {
   value = module.ecr.repository_name
 }
 
-# Jenkins
-output "jenkins_release" {
-  value = module.jenkins.jenkins_release_name
+# Jenkins (виводимо те, що повернув модуль jenkins)
+output "jenkins_service_hostname" {
+  description = "LoadBalancer hostname for Jenkins service (if any)"
+  value       = try(module.jenkins.jenkins_service_hostname, "")
 }
 
 output "jenkins_namespace" {
-  value = module.jenkins.jenkins_namespace
+  value = try(module.jenkins.jenkins_namespace, "jenkins")
 }
 
-# Argo CD
-output "argo_cd_server_url" {
-  value = "https://argo-cd.argo-cd.svc.cluster.local"
-}
-
-output "argo_cd_initial_admin_password" {
-  value = "admin"
+output "argocd_service_hostname" {
+  value = try(module.argo_cd.argocd_service_hostname, "")
 }

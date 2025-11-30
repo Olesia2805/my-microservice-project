@@ -318,3 +318,43 @@ kubectl get svc -n lesson-7
 ```
 http://<EXTERNAL-IP>
 ```
+
+"create database"
+terraform init -reconfigurate
+terraform plan
+terraform apply
+terraform state list
+terraform import module.eks.aws_iam_role.eks eks-cluster-demo-eks-cluster
+terraform import module.eks.aws_iam_role.eks_nodes eks-cluster-demo-nodes-role
+terraform import module.s3_backend.aws_s3_bucket.terraform_state terraform-state-bucket-001001-us-east-1
+terraform import module.s3_backend.aws_dynamodb_table.terraform_locks terraform-locks
+kubectl get nodes
+$pass = aws ecr get-login-password --region us-east-1
+docker login --username AWS --password $pass <account_id>.dkr.ecr.us-east-1.amazonaws.com
+![Jenkins](./terraform-hw-8-9/img/Jenkins.png)
+aws ecr describe-repositories --repository-names lesson-8-9-ecr
+open docker desktop
+docker build -t lesson-8-9-ecr:latest -f docker/django/Dockerfile .
+docker tag lesson-8-9-ecr:latest <account_id>.dkr.ecr.us-east-1.amazonaws.com/lesson-8-9-ecr:latest
+docker push <account_id>.dkr.ecr.us-east-1.amazonaws.com/lesson-8-9-ecr:latest
+aws ecr list-images --repository-name lesson-8-9-ecr
+kubectl get ns
+kubectl get pods -n argo-cd
+kubectl get svc -n argo-cd
+kubectl port-forward svc/argo-cd-argocd-server -n argo-cd 8080:443
+https://localhost:8080/
+$pass = kubectl get secret argocd-initial-admin-secret -n argo-cd -o jsonpath="{.data.password}"
+[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($pass))
+![ARGO](./terraform-hw-8-9/img/ARGO.png)
+cd charts/django-app
+helm template myapp . `
+  --set image.repository=<account_id>.dkr.ecr.us-east-1.amazonaws.com/lesson-8-9-ecr `
+  --set image.tag=latest
+kubectl create namespace django
+kubectl apply -f modules/argo_cd/charts/templates/application.yaml -n argo-cd
+kubectl port-forward svc/argo-cd-argocd-server -n argo-cd 8081:443
+$pass = kubectl -n argo-cd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | ForEach-Object { [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_)) }
+argocd login localhost:8081 --username admin --password $pass --insecure
+cd modules\argo_cd\charts\templates
+kubectl apply -f .\application.yaml
+![Django-app_deploy](./terraform-hw-8-9/img/Django-app_deploy.png)

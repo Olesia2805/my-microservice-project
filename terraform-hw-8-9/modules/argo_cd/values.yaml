@@ -1,6 +1,13 @@
 server:
   service:
     type: LoadBalancer
+    port: 443
 
-rbac:
-  create: true
+controller:
+  replicas: 1
+
+repoServer:
+  replicas: 1
+
+applicationController:
+  replicas: 1

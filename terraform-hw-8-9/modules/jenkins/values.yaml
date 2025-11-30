@@ -1,26 +1,25 @@
 controller:
   serviceType: LoadBalancer
-  servicePort: 80
-  service:
-    port: 80
-    targetPort: 8080
+
+  admin:
+    username: admin
+    password: admin
 
   resources:
     limits:
       cpu: "500m"
-      memory: "1Gi"
+      memory: "1024Mi"
     requests:
-      cpu: "250m"
+      cpu: "200m"
       memory: "512Mi"
 
-  persistentVolume:
-    enabled: true
-    storageClass: ""
-    size: 10Gi
-
   installPlugins:
-    - kubernetes:1.31.7
-    - workflow-aggregator:2.6
-    - git:4.14.0
-    - pipeline-utility-steps:2.15.2
+    - kubernetes:latest
+    - workflow-aggregator:latest
+    - git:latest
+    - configuration-as-code:latest
 
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClass: "gp2"
