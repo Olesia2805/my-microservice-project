@@ -17,14 +17,14 @@ module "vpc" {
 
 # Підключаємо модуль ECR
 module "ecr" {
-  source      = "./modules/ecr"
-  ecr_name    = "lesson-7-ecr"
+  source       = "./modules/ecr"
+  ecr_name     = "lesson-7-ecr"
   scan_on_push = true
 }
 
 # Підключаємо модуль EKS
 module "eks" {
-  source          = "./modules/eks"          
-  cluster_name    = "eks-cluster-demo"            # Назва кластера
-  subnet_ids      = module.vpc.public_subnets     # ID підмереж
+  source       = "./modules/eks"
+  cluster_name = "eks-cluster-demo"        # Назва кластера
+  subnet_ids   = module.vpc.public_subnets # ID підмереж
 }

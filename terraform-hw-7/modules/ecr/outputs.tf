@@ -10,5 +10,5 @@ output "repository_arn" {
 
 output "repository_name" {
   description = "Ім'я створеного репозиторію ECR"
-  value = aws_ecr_repository.this.name
+  value       = aws_ecr_repository.this.name
 }

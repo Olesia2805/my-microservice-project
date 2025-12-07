@@ -29,7 +29,7 @@ resource "aws_s3_bucket_ownership_controls" "terraform_state_ownership" {
 resource "aws_iam_policy" "terraform_s3_policy" {
   name        = "TerraformS3Access"
   description = "Дозволяє Terraform доступ до S3 бакета для збереження state"
-  
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [

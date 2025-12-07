@@ -17,25 +17,25 @@ module "vpc" {
 
 # Підключаємо модуль ECR
 module "ecr" {
-  source      = "./modules/ecr"
-  ecr_name    = "lesson-8-9-ecr"
+  source       = "./modules/ecr"
+  ecr_name     = "lesson-8-9-ecr"
   scan_on_push = true
 }
 
 # Підключаємо модуль EKS
 module "eks" {
-  source          = "./modules/eks"          
-  cluster_name    = "eks-cluster-demo"            # Назва кластера
-  subnet_ids      = module.vpc.public_subnets     # ID підмереж
+  source       = "./modules/eks"
+  cluster_name = "eks-cluster-demo"        # Назва кластера
+  subnet_ids   = module.vpc.public_subnets # ID підмереж
 }
 
 data "aws_eks_cluster" "this" {
-  name = module.eks.eks_cluster_name
+  name       = module.eks.eks_cluster_name
   depends_on = [module.eks]
 }
 
 data "aws_eks_cluster_auth" "this" {
-  name = module.eks.eks_cluster_name
+  name       = module.eks.eks_cluster_name
   depends_on = [module.eks]
 }
 
@@ -57,16 +57,16 @@ provider "helm" {
 
 # Jenkins module (Helm release)
 module "jenkins" {
-  source       = "./modules/jenkins"
-  namespace    = "jenkins"
+  source    = "./modules/jenkins"
+  namespace = "jenkins"
 
-  depends_on  = [module.eks]
+  depends_on = [module.eks]
 }
 
 # ArgoCD module (Helm release)
 module "argo_cd" {
-  source     = "./modules/argo_cd"
-  namespace  = "argo-cd"
+  source              = "./modules/argo_cd"
+  namespace           = "argo-cd"
   helm_chart_repo_url = "https://argoproj.github.io/argo-helm"
 
   providers = {

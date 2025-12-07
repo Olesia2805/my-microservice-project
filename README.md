@@ -322,8 +322,8 @@ http://<EXTERNAL-IP>
 Ось структурований та повний README для твого проекту, оформлений під критерії оцінювання CI/CD завдання:
 
 ---
-
-# Terraform HW8-9 — CI/CD для Django з Jenkins, Helm, Terraform та Argo CD
+-
+# [Terraform HW8-9 — CI/CD для Django з Jenkins, Helm, Terraform та Argo CD](/terraform-hw-8-9/)
 
 Цей проект демонструє повний CI/CD процес для Django-застосунку, який автоматично збирає Docker-образ, пушить його в Amazon ECR та розгортає в Kubernetes через Argo CD із Helm.
 
@@ -473,4 +473,12 @@ kubectl get svc -n django
 
 * Django застосунок розгорнуто:
   ![Django-app\_deploy](./terraform-hw-8-9/img/Django-app_deploy.png)
+
+# [Terraform HW10](/terraform-hw-10/)
+
+* use_aurora = false
+![instance_aurora_false](./terraform-hw-10/img/instance_aurora_false.png)
+
+* use_aurora = true
+![instance_aurora_true](./terraform-hw-10/img/instance_aurora_true.png)
 
