@@ -482,3 +482,25 @@ kubectl get svc -n django
 * use_aurora = true
 ![instance_aurora_true](./terraform-hw-10/img/instance_aurora_true.png)
 
+---
+
+# [Terraform Final Project](/final-project/)
+
+Grafana:
+kubectl port-forward svc/grafana 3000:80 -n monitoring
+![Grafana](/final-project/img/Grafana.png)
+![check_metric](/final-project/img/check_metric.png)
+
+Prometheus:
+kubectl port-forward svc/monitoring-kube-prometheus-prometheus 9090:9090 -n monitoring
+![Prometheus](/final-project/img/Prometheus.png)
+
+
+kubectl get all -n jenkins
+![jenkins_cmd](/final-project/img/jenkins_cmd.png)
+
+kubectl get all -n argo-cd
+![argo-cd](/final-project/img/argo-cd.png)
+
+kubectl get all -n monitoring
+![monitoring](/final-project/img/monitoring.png)

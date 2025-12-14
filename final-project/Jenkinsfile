@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+    environment {
+        ECR_REPO = "139144002561.dkr.ecr.us-east-1.amazonaws.com/lesson-8-9-ecr"
+        IMAGE_TAG = "latest"
+    }
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${ECR_REPO}:${IMAGE_TAG}")
+                }
+            }
+        }
+        stage('Push to ECR') {
+            steps {
+                script {
+                    sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REPO'
+                    sh 'docker push $ECR_REPO:$IMAGE_TAG'
+                }
+            }
+        }
+        stage('Update Helm Chart') {
+            steps {
+                sh 'helm upgrade myapp ./modules/helm-chart --set image.repository=$ECR_REPO --set image.tag=$IMAGE_TAG'
+            }
+        }
+    }
+}
