@@ -1,0 +1,13 @@
+server:
+  service:
+    type: LoadBalancer
+    port: 443
+
+controller:
+  replicas: 1
+
+repoServer:
+  replicas: 1
+
+applicationController:
+  replicas: 1
